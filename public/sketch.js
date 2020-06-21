@@ -9,11 +9,15 @@ let sinOsc
 let socket
 
 function setup() {
-  // let person = prompt("Please enter your name");
+  let person = prompt("Please enter your name");
   socket=io()
+
+  socket.emit('new_user', person)
+
   env = new p5.Env(0.1, 0.7, 0.3, 0.1);
-  sinOsc = new p5.Oscillator('sine')
-  createCanvas(canvasWidth, canvasHeight);
+  sinOsc = new p5.Oscillator('sine');
+  const canvas = createCanvas(canvasWidth, canvasHeight);
+  canvas.parent('sketch-holder');
 
   let freqTable = [261.626, 293.665, 329.628, 349.228, 391.995, 440.000, 493.883, 523.251]
 
@@ -21,11 +25,17 @@ function setup() {
     rects.push(new Key(i, canvasHeight-keyHeight, freqTable[i/keyWidth]))
   }
 
-  socket.on('play_note', (obj) => {
-    console.log("playing from elsewhere")
-    console.log(obj.freq)
-    console.log(freqTable.indexOf(obj.freq))
-    rects[freqTable.indexOf(obj.freq)].playNote()
+  socket.on('all_users', (users) => {
+    console.log("<h2> Users </h2><ul>"+users.map(u => `<li>${u.username}</li>`+'</ul>'));
+    $("#names").html("<h2> Users </h2><ul>"+users.map(u => `<li style=color:${u.colour}>${u.username}</li>`).join('')+'</ul>')
+    console.log(users)
+  })
+
+  socket.on('play_note', (freq, colour) => {
+    console.log(freq)
+    const key = rects[freqTable.indexOf(freq)]
+    key.setColour(colour)
+    key.playNote()
   })
 }
 
@@ -44,14 +54,16 @@ class Key {
     this.freq = freq;
     this.width = keyWidth;
     this.height = keyHeight;
+    this.colour = null;
     this.onHover = false;
     this.pressed = false;
   }
   
   display() {
     stroke(0)
-    
-    if (this.pressed) {
+    if (this.colour) {
+      fill(this.colour)
+    } else if (this.pressed) {
       fill(150)
     } else if ((mouseX > this.x && mouseX < this.x + keyWidth && mouseY > this.y && mouseY < this.y+keyHeight)) {
       this.onHover = true
@@ -63,8 +75,13 @@ class Key {
     rect(this.x, this.y, this.width, this.height)
   }
 
+  setColour(colour) {
+    this.colour = colour
+    console.log(this.colour)
+    setTimeout(() => {this.colour = null}, 1000)
+  }
+
   playNote() {
-    
     sinOsc.start()
     sinOsc.freq(this.freq)
     env.play(sinOsc)

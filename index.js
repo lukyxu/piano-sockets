@@ -5,6 +5,8 @@ var io = require('socket.io')(http);
 const path = require('path');
 const fs = require('fs');
 const port = process.env.PORT || '3000';
+let userMap = new Map();
+let colours = ['Aqua', 'Aquamarine', 'Blue', 'BlueViolet', 'Brown', 'Coral', 'Crimson', 'Cyan', 'DarkBlue', 'DarkCyan', 'DarkGoldenRod', 'DarkGreen', 'DarkGreen', 'DarkOliveGreen', 'DarkMagenta', 'DeepSkyBlue']
 
 app.use(express.static('public'))
 
@@ -47,13 +49,28 @@ io.on('connection', (socket) => {
   console.log('a user connected');
 
   socket.on('disconnect', () => {
+    if (userMap.get(socket.id)) {
+      colours.push(userMap.get(socket.id).colour)
+      userMap.delete(socket.id)
+      socket.emit('all_users', Array.from(userMap.values()))
+    }
+
+    console.log(userMap)
     console.log('user disconnected');
   });
 
   socket.on('queue_note', (freq) => {
     console.log(freq);
-    socket.broadcast.emit('play_note', {freq})
+    socket.broadcast.emit('play_note', freq, userMap.get(socket.id).colour)
   });
+
+  socket.on('new_user', (username) => {
+    const colour = colours.splice(Math.floor(Math.random() * colours.length), 1)[0];
+    userMap.set(socket.id, {username, colour})
+    console.log(userMap)
+    io.emit('all_users', Array.from(userMap.values()))
+  });
+
 });
 
 http.listen(port, () => {
