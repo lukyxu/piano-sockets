@@ -52,7 +52,7 @@ io.on('connection', (socket) => {
     if (userMap.get(socket.id)) {
       colours.push(userMap.get(socket.id).colour)
       userMap.delete(socket.id)
-      socket.emit('all_users', Array.from(userMap.values()))
+      io.emit('all_users', Array.from(userMap.values()))
     }
 
     console.log(userMap)

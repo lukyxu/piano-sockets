@@ -10,7 +10,7 @@ let socket
 
 function setup() {
   let person = prompt("Please enter your name");
-  socket=io()
+  socket = io()
 
   socket.emit('new_user', person)
 
@@ -21,18 +21,15 @@ function setup() {
 
   let freqTable = [261.626, 293.665, 329.628, 349.228, 391.995, 440.000, 493.883, 523.251]
 
-  for (let i = 0; i < canvasWidth; i+=keyWidth) {
-    rects.push(new Key(i, canvasHeight-keyHeight, freqTable[i/keyWidth]))
+  for (let i = 0; i < canvasWidth; i += keyWidth) {
+    rects.push(new Key(i, canvasHeight - keyHeight, freqTable[i / keyWidth]))
   }
 
   socket.on('all_users', (users) => {
-    console.log("<h2> Users </h2><ul>"+users.map(u => `<li>${u.username}</li>`+'</ul>'));
-    $("#names").html("<h2> Users </h2><ul>"+users.map(u => `<li style=color:${u.colour}>${u.username}</li>`).join('')+'</ul>')
-    console.log(users)
+    $("#names").html("<h2> Users </h2><ul>" + users.map(u => `<li style=color:${u.colour}>${u.username}</li>`).join('') + '</ul>')
   })
 
   socket.on('play_note', (freq, colour) => {
-    console.log(freq)
     const key = rects[freqTable.indexOf(freq)]
     key.setColour(colour)
     key.playNote()
@@ -56,19 +53,17 @@ class Key {
     this.height = keyHeight;
     this.colour = null;
     this.onHover = false;
-    this.pressed = false;
   }
-  
+
   display() {
     stroke(0)
-    if (this.colour) {
-      fill(this.colour)
-    } else if (this.pressed) {
-      fill(150)
-    } else if ((mouseX > this.x && mouseX < this.x + keyWidth && mouseY > this.y && mouseY < this.y+keyHeight)) {
+    if ((mouseX > this.x && mouseX < this.x + keyWidth && mouseY > this.y && mouseY < this.y + keyHeight)) {
       this.onHover = true
       fill(200)
-    } else {
+    } else if (this.colour) {
+      fill(this.colour)
+    }
+    else {
       this.onHover = false
       fill(255)
     }
@@ -77,8 +72,7 @@ class Key {
 
   setColour(colour) {
     this.colour = colour
-    console.log(this.colour)
-    setTimeout(() => {this.colour = null}, 1000)
+    setTimeout(() => { this.colour = null }, 600)
   }
 
   playNote() {
