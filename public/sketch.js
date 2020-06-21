@@ -15,7 +15,7 @@ function setup() {
   socket.emit('new_user', person)
 
   env = new p5.Env(0.1, 0.7, 0.3, 0.1);
-  sinOsc = new p5.Oscillator('triangle');
+  sinOsc = new p5.Oscillator('sine');
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('sketch-holder');
 
