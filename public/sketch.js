@@ -1,5 +1,5 @@
 let rects = []
-const canvasWidth = 1050;
+const canvasWidth = 1100;
 const canvasHeight = 400;
 const keyWidth = 50
 const keyHeight = 100
@@ -22,7 +22,8 @@ function setup() {
   let freqTable = [
     130.813, 146.832, 164.814, 174.614, 195.998, 220.000, 246.942,
     261.626, 293.665, 329.628, 349.228, 391.995, 440.000, 493.883, 
-    523.251, 587.330, 659.255, 698.456, 783.991, 880.000, 987.767]
+    523.251, 587.330, 659.255, 698.456, 783.991, 880.000, 987.767,
+    1046.502]
 
   for (let i = 0; i < canvasWidth; i += keyWidth) {
     rects.push(new Key(i, canvasHeight - keyHeight, freqTable[i / keyWidth]))
