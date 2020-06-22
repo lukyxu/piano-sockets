@@ -6,7 +6,11 @@ const path = require('path');
 const fs = require('fs');
 const port = process.env.PORT || '3000';
 let userMap = new Map();
+let songMap = new Map();
 let colours = ['Aqua', 'Aquamarine', 'Blue', 'BlueViolet', 'Brown', 'Coral', 'Crimson', 'Cyan', 'DarkBlue', 'DarkCyan', 'DarkGoldenRod', 'DarkGreen', 'DarkGreen', 'DarkOliveGreen', 'DarkMagenta', 'DeepSkyBlue']
+
+songMap.set("Kataware", ['m','m','m','m','v','x', 'x','\\'])
+songMap.set("Test", ['a','b','c','d','e','f'])
 
 app.use(express.static('public'))
 
@@ -68,11 +72,20 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('play_note', freq, userMap.get(socket.id).colour)
   });
 
+  socket.on('queue_song', (songName) => {
+    songNotes = songMap.get(songName)
+    if (songNotes == null) {
+      return
+    }
+    io.emit('play_song', {songName, songNotes, position: 0})
+  });
+
   socket.on('new_user', (username) => {
     const colour = colours.splice(Math.floor(Math.random() * colours.length), 1)[0];
     userMap.set(socket.id, {username, colour, id: socket.id})
     console.log(userMap)
     io.emit('all_users', Array.from(userMap.values()))
+    io.emit('all_songs', Array.from(songMap.keys()))
     const users = Array.from(userMap.values()).filter(u => u.cursorX != null && u.cursorY != null)
     socket.broadcast.emit('update_cursors', users)
   });
@@ -84,7 +97,6 @@ io.on('connection', (socket) => {
     userMap.get(socket.id).cursorX = x
     userMap.get(socket.id).cursorY = y
     
-    console.log(userMap)
     const users = Array.from(userMap.values()).filter(u => u.cursorX != null && u.cursorY != null)
     socket.broadcast.emit('update_cursors', users)
   });

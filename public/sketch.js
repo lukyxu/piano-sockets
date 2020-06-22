@@ -11,6 +11,9 @@ const whiteKeyIndex = [0, 2, 4, 5, 7, 9, 11]
 const blackKeyIndex = [1, 3, 6, 8, 10]
 const keyMap = new Map()
 var users = []
+var currentSong = null
+
+const keyMappings = ['q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']','a','s','d','f','g','h','j','k','l',';','\'','#','\\','z','x','c','v','b','n','m',',','.','/', '8','9','0']
 
 var AudioContextFunc = window.AudioContext || window.webkitAudioContext;
 var audioContext = new AudioContextFunc();
@@ -18,7 +21,12 @@ var player = new WebAudioFontPlayer();
 player.loader.decodeAfterLoading(audioContext, '_tone_0000_JCLive_sf2_file');
 
 function playNote(note) {
-  console.log(note)
+  if (currentSong != null && keyMap.get(note).letter == currentSong.songNotes[currentSong.position]) {
+    currentSong.position++;
+    if (currentSong.position >= currentSong.songNotes.length) {
+      currentSong = null
+    }
+  }
   player.queueWaveTable(audioContext, audioContext.destination
     , _tone_0000_JCLive_sf2_file, 0, note, 1, 0.2);
   return false;
@@ -52,13 +60,22 @@ function setup() {
   
 
   socket.on('all_users', (users) => {
-    $("#names").html("<h2> Users </h2><ul>" + users.map(u => `<li style=color:${u.colour}>${u.username}</li>`).join('') + '</ul>')
+    $("#names").html("<ul>" + users.map(u => `<li style=color:${u.colour}>${u.username}</li>`).join('') + '</ul>')
+  })
+
+  socket.on('all_songs', (song) => {
+    $("#songs").html("<ul>" + song.map(u => `<li>${u} <button value='${u}' onclick="playSong(this.value)">Play</button></li>`).join('') + '</ul>')
   })
 
   socket.on('play_note', (note, colour) => {
     const key = keyMap.get(note)
     key.setColour(colour)
     playNote(note)
+  })
+
+  socket.on('play_song', (song) => {
+    currentSong = song
+    console.log(currentSong)
   })
 
   socket.on('update_cursors', (usrs) => {
@@ -72,10 +89,21 @@ function setup() {
   })
 }
 
+function playSong(songName) {
+  console.log(songName)
+  socket.emit('queue_song', songName)
+}
+
 function draw() {
   background(204);
   keyMap.forEach(k => k.display())
   users.filter(u => u.id != socket.id).forEach(u => { fill(u.colour); ellipse(u.cursorX, u.cursorY, 10,10)})
+
+  if (currentSong != null) {
+    textSize(200);
+    textAlign(CENTER);
+    text(currentSong.songNotes[currentSong.position], canvasWidth/2, canvasHeight/2.5);
+  }
 }
 
 function newWhiteKey(x,y,note, offset) {
@@ -95,6 +123,7 @@ class Key {
     this.x = x;
     this.y = y;
     this.note = note;
+    this.letter = keyMappings[note-48]
     this.offset = offset;
     this.width = width;
     this.height = height;
@@ -134,6 +163,7 @@ function playKey(key) {
   key.pressed = true
   socket.emit('queue_note', key.note)
   console.log(key.note)
+  console.log(key.letter)
   playNote(key.note)
 }
 
@@ -146,10 +176,8 @@ function mousePressed() {
 }
 
 function keyPressed() {
-
-  const KeyMappings = ['q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']','a','s','d','f','g','h','j','k','l',';','\'','#','\\','z','x','c','v','b','n','m',',','.','/', '8','9','0']
   console.log(key)
-  const index = KeyMappings.indexOf(key)
+  const index = keyMappings.indexOf(key)
   if (index != -1) {
     console.log(index+48)
     const key = keyMap.get(index+48)
