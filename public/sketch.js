@@ -289,6 +289,6 @@ function hasNumber(str) {
   return /\d/.test(str)
 }
 
-const xd = ['D5','F5#','D5','F5#','D5','F5#', 'C5', 'E5', 'C5', 'D', 'F#', 'D','F#','D','F#', 'C', 'E','C', 'D', 'A','D', 'D5','D', 'G', 'G','A','B', 'C', 'A','B','C','D','G','F#','B','B','D','D','C','B','E','D','C','B','C','E','B','A','G','G', 'B','B', 'A','G','C','D','B','B','A','G','C','D','B','A','G']
+const xd = ['D5','F5#','D5','F5#','D5','F5#', 'C5', 'E5', 'C5', 'D', 'F#', 'D','F#','D','F#', 'C', 'E','C', 'D', 'A','D', 'D5','D', 'G', 'G','A','B', 'C', 'A','B','C','D','G','F#','B','B','D','D','C','B','E','D','C','B','C','E','B5','A5','G','G', 'B5','B5', 'A5','G','C','D','B5','B5','A5','G','C','D','B5','A5','G']
 
 console.log(xd.map(x => "'"+convertNoteToKeyboard(x)+"'").join(','))
