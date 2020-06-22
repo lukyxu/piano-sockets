@@ -4,6 +4,9 @@ const whiteKeyWidth = 50
 const whiteKeyHeight = 200
 const blackKeyWidth = 36
 const blackKeyHeight = 140
+// Notes Keyboard
+var displayNotes = 'KeyboardBindings'
+
 
 let socket
 
@@ -15,6 +18,7 @@ var currentSong = null
 var songNames = []
 
 const keyMappings = ['q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']','a','s','d','f','g','h','j','k','l',';','\'','#','\\','z','x','c','v','b','n','m',',','.','/', '8','9','0']
+const noteMappings = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
 var AudioContextFunc = window.AudioContext || window.webkitAudioContext;
 var audioContext = new AudioContextFunc();
@@ -22,7 +26,7 @@ var player = new WebAudioFontPlayer();
 player.loader.decodeAfterLoading(audioContext, '_tone_0000_JCLive_sf2_file');
 
 function playNote(note) {
-  if (currentSong != null && keyMap.get(note).letter == currentSong.songNotes[currentSong.position]) {
+  if (currentSong != null && keyMap.get(note).keyboardLetter == currentSong.songNotes[currentSong.position]) {
     currentSong.position++;
     if (currentSong.position >= currentSong.songNotes.length) {
       currentSong = null
@@ -46,7 +50,6 @@ function setup() {
     const whiteIndex = (x / whiteKeyWidth)
     const whiteOffset = whiteKeyIndex[whiteIndex % whiteKeyIndex.length]
     const note = (4 + (Math.floor(whiteIndex / whiteKeyIndex.length))) * 12 + whiteOffset
-    // console.log(note)
     keyMap.set(note, newWhiteKey(x, y, note, whiteOffset))
   }
 
@@ -58,6 +61,7 @@ function setup() {
       blackIndex++
     }
   })
+
   
 
   socket.on('all_users', (users) => {
@@ -106,8 +110,10 @@ function draw() {
 
   if (currentSong != null) {
     fill(0)
+    stroke(255)
     textSize(200);
     textAlign(CENTER);
+    
     const mainChar = currentSong.songNotes[currentSong.position]
     text(currentSong.songNotes[currentSong.position], canvasWidth/2, canvasHeight/2.5);
     var offset = textWidth(mainChar) + canvasWidth/2
@@ -119,6 +125,10 @@ function draw() {
       text(nextChar, offset, canvasHeight/2.5);
       offset += textWidth(nextChar)
     }
+    textAlign(LEFT)
+    textSize(20);
+    noStroke()
+    text("Playing:" + currentSong.songName, padding, canvasHeight/2);
   }
 }
 
@@ -143,13 +153,24 @@ class Key {
     this.x = x;
     this.y = y;
     this.note = note;
-    this.letter = keyMappings[note-48]
+    this.keyboardLetter = keyMappings[note-48]
     this.offset = offset;
     this.width = width;
     this.height = height;
     this.isBlack = isBlack;
     this.colour = null;
     this.onHover = false;
+
+    const noteMapping = noteMappings[note%12]
+    var num = Math.floor(note/12-1)
+    if (note%12>=9) {
+      num++
+    }
+    
+    this.noteLetter = noteMapping.charAt(0) + num
+    if (noteMapping.includes('#')) {
+      this.noteLetter += '#'
+    }
   }
 
   display() {
@@ -171,6 +192,29 @@ class Key {
       }
     }
     rect(this.x, this.y, this.width, this.height)
+
+    if (displayNotes === 'None') {
+      return
+    }
+
+    let displayNote = ''
+    if (displayNotes === 'KeyboardBindings') {
+      textSize(18);
+      displayNote = this.keyboardLetter
+    } else if (displayNotes === 'NoteBindings') {
+      textSize(14);
+      displayNote = this.noteLetter
+    }
+
+    textAlign(CENTER)
+    if (this.isBlack) {
+      stroke(255)
+      fill(255)
+    } else {
+      stroke(0)
+      fill(0)
+    }
+    text(displayNote, this.x+this.width/2, this.y + this.height-textAscent(displayNote))
   }
 
   setColour(colour) {
@@ -222,3 +266,29 @@ function keyPressed() {
     key.setColour('silver')
   }
 }
+
+function setDisplayNotes(d) {
+  displayNotes = d
+}
+
+function convertNoteToKeyboard(note) {
+  if (!hasNumber(note)) {
+    note = note.slice(0,1) + '4' + note.slice(1)
+  }
+  var index = noteMappings.findIndex(x => x == note.charAt(0) + note.charAt(2))
+  if (index >= 9) {
+    index = index - 12
+  }
+  index += 12 * (note.charAt(1)-3)
+  console.log(index)
+  console.log(keyMappings[index])
+  return keyMappings[index]
+}
+
+function hasNumber(str) {
+  return /\d/.test(str)
+}
+
+const xd = ['D5','F5#','D5','F5#','D5','F5#', 'C5', 'E5', 'C5', 'D', 'F#', 'D','F#','D','F#', 'C', 'E','C', 'D', 'A','D', 'D5','D', 'G', 'G','A','B', 'C', 'A','B','C','D','G','F#','B','B','D','D','C','B','E','D','C','B','C','E','B','A','G','G', 'B','B', 'A','G','C','D','B','B','A','G','C','D','B','A','G']
+
+console.log(xd.map(x => "'"+convertNoteToKeyboard(x)+"'").join(','))

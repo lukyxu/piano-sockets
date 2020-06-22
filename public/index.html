@@ -23,7 +23,8 @@
 
 <body>
   <div id="sketch-holder"></div>
-  <h2> Users </h2>
+  <div style="padding-left: 10px;">
+  <h2>Users</h2>
   <div id="names"></div>
   <h3>Songs</h3>
   <div id="songs"></div>
@@ -32,10 +33,19 @@
     <label for="song-name">Song Name</label><br>
     <input type="text" id="song-name"><br><br>
     <label for="keys">Keys (comma seperated)</label><br>
-    <input type="text" id="keys">
-  <input type="submit">
+    <input type="text" id="keys"> <input type="submit" value="Submit">
+  <br>
+  <h3>Options</h3>
+  Displayed Bindings
+  <select id="display-notes-dropdown" onchange="setDisplayNotes(this.value)">
+    <option value="None">None</option>
+    <option value="KeyboardBindings" selected="selected">Keyboard Bindings</option>
+    <option value="NoteBindings">Note Bindings</option>
+
+  </select>
   </form>
   </div>
+</div>
 </body>
 
 </html>

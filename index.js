@@ -11,8 +11,7 @@ let colours = ['Aqua', 'Aquamarine', 'Blue', 'BlueViolet', 'Brown', 'Coral', 'Cr
 
 // 0.55 '\\', 'x','v','x'
 songMap.set("Kataware", ['m','m','m','m','v','x', 'x','\\', 'v', '\\', 'm', 'm', '\\', '9', '8', '.', 'm', 'm', '.', 'm', 'v', 'b', 'v', 'x', '\\', 'm', 'm', 'm', 'm','v', 'x', 'x', '\\', 'v', 'k', '\\', 'x','v','x','\\', '\\', ';','\\','\\','\\', 'k', '\\', 'x','v','x','k','\\','m', '\\', 'x', 'k'])
-songMap.set("Test", ['a','b','c','d','e','f'])
-
+songMap.set("Piano for brother",['x','n','x','n','x','n','\\','v','\\','d','j','d','j','d','j','a','g','a','d','p','d','x','d','k','k','p',']','a','p',']','a','d','k','j',']',']','d','d','a',']','g','d','a',']','a','g',']','p','k','k',']',']','p','k','a','d',']',']','p','k','a','d',']','p','k'])
 app.use(express.static('public'))
 
 app.get('/', (req, res) => {
