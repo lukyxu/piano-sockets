@@ -105,9 +105,20 @@ function draw() {
   users.filter(u => u.id != socket.id).forEach(u => { fill(u.colour); ellipse(u.cursorX, u.cursorY, 10,10)})
 
   if (currentSong != null) {
+    fill(0)
     textSize(200);
     textAlign(CENTER);
+    const mainChar = currentSong.songNotes[currentSong.position]
     text(currentSong.songNotes[currentSong.position], canvasWidth/2, canvasHeight/2.5);
+    var offset = textWidth(mainChar) + canvasWidth/2
+    const padding = 30
+    for (let i = currentSong.position + 1; i < currentSong.songNotes.length && i < currentSong.position + 5; i++ ) {
+      offset += padding
+      const nextChar = currentSong.songNotes[i]
+      textSize(80);
+      text(nextChar, offset, canvasHeight/2.5);
+      offset += textWidth(nextChar)
+    }
   }
 }
 
