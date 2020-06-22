@@ -10,6 +10,7 @@ let socket
 const whiteKeyIndex = [0, 2, 4, 5, 7, 9, 11]
 const blackKeyIndex = [1, 3, 6, 8, 10]
 const keyMap = new Map()
+var users = []
 
 var AudioContextFunc = window.AudioContext || window.webkitAudioContext;
 var audioContext = new AudioContextFunc();
@@ -29,6 +30,7 @@ function setup() {
   socket.emit('new_user', person)
   const canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent('sketch-holder');
+  canvas.mouseMoved(updateCursor)
 
   for (let x = 0; x < canvasWidth; x += whiteKeyWidth) {
     const y = canvasHeight - whiteKeyHeight
@@ -54,16 +56,26 @@ function setup() {
   })
 
   socket.on('play_note', (note, colour) => {
-    console.log("WHy")
     const key = keyMap.get(note)
     key.setColour(colour)
     playNote(note)
+  })
+
+  socket.on('update_cursors', (usrs) => {
+    console.log(usrs)
+    users = usrs
+  })
+
+  socket.on('update_username', () => {
+    let person = prompt("Please enter your name");
+    socket.emit('new_user', person)
   })
 }
 
 function draw() {
   background(204);
   keyMap.forEach(k => k.display())
+  users.filter(u => u.id != socket.id).forEach(u => { fill(u.colour); ellipse(u.cursorX, u.cursorY, 10,10)})
 }
 
 function newWhiteKey(x,y,note, offset) {
@@ -72,6 +84,10 @@ function newWhiteKey(x,y,note, offset) {
 
 function newBlackKey(x,y,note, offset) {
   return new Key(x, y, note, offset, blackKeyWidth, blackKeyHeight, true)
+}
+
+function updateCursor() {
+  socket.emit('update_cursor', mouseX, mouseY)
 }
 
 class Key {

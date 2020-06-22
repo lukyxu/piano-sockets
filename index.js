@@ -60,15 +60,33 @@ io.on('connection', (socket) => {
   });
 
   socket.on('queue_note', (freq) => {
+    if (userMap.get(socket.id) == null) {
+      socket.emit('update_username')
+      return
+    }
     console.log(freq);
     socket.broadcast.emit('play_note', freq, userMap.get(socket.id).colour)
   });
 
   socket.on('new_user', (username) => {
     const colour = colours.splice(Math.floor(Math.random() * colours.length), 1)[0];
-    userMap.set(socket.id, {username, colour})
+    userMap.set(socket.id, {username, colour, id: socket.id})
     console.log(userMap)
     io.emit('all_users', Array.from(userMap.values()))
+    const users = Array.from(userMap.values()).filter(u => u.cursorX != null && u.cursorY != null)
+    socket.broadcast.emit('update_cursors', users)
+  });
+
+  socket.on('update_cursor', (x,y) => {
+    if (userMap.get(socket.id) == null) {
+      return
+    }
+    userMap.get(socket.id).cursorX = x
+    userMap.get(socket.id).cursorY = y
+    
+    console.log(userMap)
+    const users = Array.from(userMap.values()).filter(u => u.cursorX != null && u.cursorY != null)
+    socket.broadcast.emit('update_cursors', users)
   });
 
 });
