@@ -12,6 +12,7 @@ const blackKeyIndex = [1, 3, 6, 8, 10]
 const keyMap = new Map()
 var users = []
 var currentSong = null
+var songNames = []
 
 const keyMappings = ['q', 'w', 'e', 'r', 't', 'y', 'u','i','o','p','[',']','a','s','d','f','g','h','j','k','l',';','\'','#','\\','z','x','c','v','b','n','m',',','.','/', '8','9','0']
 
@@ -63,8 +64,9 @@ function setup() {
     $("#names").html("<ul>" + users.map(u => `<li style=color:${u.colour}>${u.username}</li>`).join('') + '</ul>')
   })
 
-  socket.on('all_songs', (song) => {
-    $("#songs").html("<ul>" + song.map(u => `<li>${u} <button value='${u}' onclick="playSong(this.value)">Play</button></li>`).join('') + '</ul>')
+  socket.on('all_songs', (sn) => {
+    songNames = sn
+    $("#songs").html("<ul>" + sn.map(u => `<li>${u} <button value='${u}' onclick="playSong(this.value)">Play</button></li>`).join('') + '</ul>')
   })
 
   socket.on('play_note', (note, colour) => {
@@ -87,6 +89,9 @@ function setup() {
     let person = prompt("Please enter your name");
     socket.emit('new_user', person)
   })
+
+  const s = $('#song-name')
+  const k = $('#keys')
 }
 
 function playSong(songName) {
@@ -112,6 +117,10 @@ function newWhiteKey(x,y,note, offset) {
 
 function newBlackKey(x,y,note, offset) {
   return new Key(x, y, note, offset, blackKeyWidth, blackKeyHeight, true)
+}
+
+function updateCursor() {
+  socket.emit('update_cursor', mouseX, mouseY)
 }
 
 function updateCursor() {
@@ -162,9 +171,21 @@ class Key {
 function playKey(key) {
   key.pressed = true
   socket.emit('queue_note', key.note)
-  console.log(key.note)
-  console.log(key.letter)
   playNote(key.note)
+}
+
+function addNewSong() {
+  const songName = $('#song-name').val()
+  const keys = $('#keys').val().split(',')
+  const valid = keys.every(k => keyMappings.includes(k))
+  if (!valid) {
+    alert('Invalid keys')
+  } else if (songNames.includes(songName)) {
+    alert('Song name already taken')
+  } else {
+    socket.emit('add_song', songName, keys)
+  }
+  return false
 }
 
 function mousePressed() {
@@ -176,7 +197,11 @@ function mousePressed() {
 }
 
 function keyPressed() {
-  console.log(key)
+  const s = $('#song-name')
+  const k = $('#keys')
+  if (s.is(':focus') || k.is(':focus')) {
+    return;
+  }
   const index = keyMappings.indexOf(key)
   if (index != -1) {
     console.log(index+48)

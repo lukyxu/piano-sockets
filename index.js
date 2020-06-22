@@ -101,6 +101,11 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('update_cursors', users)
   });
 
+  socket.on('add_song', (songNames, keys) => {
+    songMap.set(songNames, keys)
+    io.emit('all_songs', Array.from(songMap.keys()))
+  });
+
 });
 
 http.listen(port, () => {
