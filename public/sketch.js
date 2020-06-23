@@ -93,9 +93,6 @@ function setup() {
     let person = prompt("Please enter your name");
     socket.emit('new_user', person)
   })
-
-  const s = $('#song-name')
-  const k = $('#keys')
 }
 
 function playSong(songName) {
@@ -231,7 +228,21 @@ function playKey(key) {
 
 function addNewSong() {
   const songName = $('#song-name').val()
-  const keys = $('#keys').val().split(',')
+  var keys = $('#keys').val().toLowerCase().replace(/\s/g,'').split(',')
+  
+  if ($("#add-song-options-dropdown").val() === 'NoteBindings') {
+    console.log($("#add-song-options-dropdown").val())
+    keys = keys.map(k => k.toUpperCase())
+    const valid = keys.every(k => validateNoteKey(k))
+    console.log(valid)
+    if (!valid) {
+      alert('Invalid keys')
+      return false
+    }
+    keys = keys.map(x => convertNoteToKeyboard(x))
+  }
+  console.log(keys)
+
   const valid = keys.every(k => keyMappings.includes(k))
   if (!valid) {
     alert('Invalid keys')
@@ -259,9 +270,7 @@ function keyPressed() {
   }
   const index = keyMappings.indexOf(key)
   if (index != -1) {
-    console.log(index+48)
     const key = keyMap.get(index+48)
-    console.log(key)
     playKey(key)
     key.setColour('silver')
   }
@@ -292,3 +301,24 @@ function hasNumber(str) {
 const xd = ['D5','F5#','D5','F5#','D5','F5#', 'C5', 'E5', 'C5', 'D', 'F#', 'D','F#','D','F#', 'C', 'E','C', 'D', 'A','D', 'D5','D', 'G', 'G','A','B', 'C', 'A','B','C','D','G','F#','B','B','D','D','C','B','E','D','C','B','C','E','B5','A5','G','G', 'B5','B5', 'A5','G','C','D','B5','B5','A5','G','C','D','B5','A5','G']
 
 console.log(xd.map(x => "'"+convertNoteToKeyboard(x)+"'").join(','))
+
+function validateNoteKey(key) {
+  console.log(key)
+  if (!hasNumber(key)) {
+    console.log(key)
+    key = key.slice(0,1) + '4' + key.slice(1)
+  }
+  if (key.length < 1 || key.length > 3) {
+    return false
+  }
+  const note = key.charAt(0) + key.charAt(2)
+
+  if (!noteMappings.includes(note)) {
+    return false
+  }
+  const no = key.charAt(1)
+  if (no > 6 || no < 3) {
+    return false
+  }
+  return true
+}
