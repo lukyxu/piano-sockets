@@ -28,6 +28,7 @@ player.loader.decodeAfterLoading(audioContext, '_tone_0000_JCLive_sf2_file');
 function playNote(note) {
   if (currentSong != null && keyMap.get(note).keyboardLetter == currentSong.songNotes[currentSong.position]) {
     currentSong.position++;
+    console.log(currentSong.position)
     if (currentSong.position >= currentSong.songNotes.length) {
       currentSong = null
     }
@@ -298,7 +299,7 @@ function hasNumber(str) {
   return /\d/.test(str)
 }
 
-const xd = ['D5','F5#','D5','F5#','D5','F5#', 'C5', 'E5', 'C5', 'D', 'F#', 'D','F#','D','F#', 'C', 'E','C', 'D', 'A','D', 'D5','D', 'G', 'G','A','B', 'C', 'A','B','C','D','G','F#','B','B','D','D','C','B','E','D','C','B','C','E','B5','A5','G','G', 'B5','B5', 'A5','G','C','D','B5','B5','A5','G','C','D','B5','A5','G']
+const xd = ['D5','A5','B5','F#','G','D','G','A5','F5#','E5','D5','C5#', 'B5', 'A5','B5','C5#','D5','C5#','B5','A5','G','F#','G','E','D','F#','A5','G','F#','D','F#','E','D','B','D','A5','G','B5','A5','G','F#','D','E','C5#','D5','F5#','A6','A5','B5','G','A5','F#','D','D5','D5','C5#','D5','C5#','D5#','D','C#','A5','E','F#','D','D5','C5#','B5','C5#','F5#','A6','B6','G5','F5#','E5','G5','F5#','E5','D5','C5#','B5','A5','G','F#','E','G','F#','E','D','E','F#','G','A5','E','A5','G','F#','B5','A5','G','A5','G','F#','E','D','B','B5','C5#','B5','A5','G','F#','E','B5','A5','B5','A5','G','F#','F5#','E5']
 
 console.log(xd.map(x => "'"+convertNoteToKeyboard(x)+"'").join(','))
 
